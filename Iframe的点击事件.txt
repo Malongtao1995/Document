@@ -1,0 +1,66 @@
+﻿ 为iframe添加onclick事件
+
+如果页面上有iframe时，鼠标点击在iframe内时，包含iframe的document是不响应任何事件的，
+
+例如：
+
+ $("#iframe1").click(function(){//点击iframe
+            alert("点击1");
+ });
+或者    
+ $(function(){//给iframe循环绑定click事件
+            for(var n=1;n<=7;n++){
+                $("#iframe"+n).bind("click",{n:n}, clickHandler);
+            }
+            function clickHandler(event) {
+                var n = event.data.n;
+                alert("点击"+n);
+            }
+ });
+
+均行不通。
+
+所以需要给iframe绑定类似的事件，当iframe指向的是第三方的内容时，还要考虑跨域的问题，因此通过操作iframe的document是行不通的，还好有document.activeElement可供我们使用，最终的解决方案如下：
+
+ 
+[javascript] view plain copy
+
+    var IframeOnClick = {  
+        resolution: 200,  
+        iframes: [],  
+        interval: null,  
+        Iframe: function() {  
+            this.element = arguments[0];  
+            this.cb = arguments[1];   
+            this.hasTracked = false;  
+        },  
+        track: function(element, cb) {  
+            this.iframes.push(new this.Iframe(element, cb));  
+            if (!this.interval) {  
+                var _this = this;  
+                this.interval = setInterval(function() { _this.checkClick(); }, this.resolution);  
+            }  
+        },  
+        checkClick: function() {  
+            if (document.activeElement) {  
+                var activeElement = document.activeElement;  
+                for (var i in this.iframes) {  
+                    if (activeElement === this.iframes[i].element) { // user is in this Iframe  
+                        if (this.iframes[i].hasTracked == false) {   
+                            this.iframes[i].cb.apply(window, []);   
+                            this.iframes[i].hasTracked = true;  
+                        }  
+                    } else {  
+                        this.iframes[i].hasTracked = false;  
+                    }  
+                }  
+            }  
+        }  
+    };  
+
+调用
+[javascript] view plain copy
+
+        IframeOnClick.track(document.getElementById("iFrame"), function() { alert('a click'); }); 
+
+分类: JavaScript

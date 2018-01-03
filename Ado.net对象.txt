@@ -1,0 +1,224 @@
+http://blog.sina.com.cn/s/blog_6e0401aa0100mdz1.html
+ ADO.NET访问SQL Server数据库（原创） (2010-11-08 00:00:00)
+转载
+▼
+标签： 杂谈 	分类： 编程
+
+ADO.NET的对象主要包括Connection、Command、DataReader、DataAdapter、DataSet，ADO.NET访问数据库主要包括两个步骤：建立数据库连接、读取或更新数据。
+
+一、建立数据库连接
+
+Connection对象负责建立和控制用户应用程序和数据库之间的连接。所有的数据库连接都要用到连接字符串，该字符串是使用分号隔开的多项信息，其内容随着数据库类型和访问内容的变化而变化。
+
+连接字符串的格式："Server=服务器名或服务器IP地址;DataBase=数据库名称;User ID=用户名;Pwd=密码"
+
+使用Connection对象连接SQL Server数据库的方法如下：
+
+using System.Data.SqlClient;引用namespace
+
+......
+
+SqlConnection con=new SqlConnection(连接字符串);
+
+con.Open();
+
+......
+
+//数据库相关操作
+
+......
+
+con.Close();
+
+ 
+
+1. 在Web.config文件中配置与数据库连接的字符串
+
+<configuration>
+
+  <connectionStrings>
+        <add name="连接字符串名称" connectionString="Data Source=服务器名或服务器IP地址;
+
+     Initial Catalog=数据库名称;Persist Security Info=True;User ID=用户名;Password=密码"
+
+     providerName="System.Data.SqlClient"/>
+      </connectionStrings>
+
+</configuration>
+
+2. 在C#中获取Web.config文件中的数据库连接字符串
+
+连接字符串=ConfigurationManager.ConnectionStrings["连接字符串名称"].ToString()
+
+ 
+
+二、读取数据
+
+当应用程序与数据库建立好连接后，便可从数据库的表中读取数据，通常有两种方法：一种是使用Command和DataReader对象，另一种是使用DataAdapter和DataSet对象。
+
+ 
+
+1. 使用Command和DataReader对象读取数据
+
+DataReader对从SQL数据库检索的数据提供仅向前的只读指针。由于DataReader类是抽象类，不能直接实例化，因此，如果要使用DataReader对象，需要先创建Command对象。Command对象的ExecuteReader方法将创建一个DataReader对象，该对象从数据库中读取由select命令返回的只读、只进的数据流，且一次只读取一条数据。
+
+SqlCommand com=new SqlCommand(cmdstr,con);//使用指定的SQL命令和连接对象创建SqlCommand对象
+
+SqlDataReader dr=com.ExecuteReader();//执行SQL语句，返回SqlDataReader对象
+
+While (dr.Read())//循环读取，每次读取一条记录
+
+{
+
+//循环体内语句，例如：string s=dr["column_name"].ToString();
+
+}
+
+dr.Close();
+
+采取这种方式读取数据时，内存中只有一行内容，所以不仅提高了应用程序的性能，还有助于减少系统的开销。采用DataReader对象读取数据的方式适用于下列情形：
+
+    不需要缓存数据；
+    要处理的结果太大，内存中放不下；
+    需要以仅向前、只读方式快速访问数据；
+
+DataReader对象的局限性有以下3点：
+
+    只能向前循环读取数据；
+    只能读取数据，不能修改数据；
+    只能处理一个表的数据；
+
+注意：DataReader在使用时，将以独占方式使用Connection。也就是说，在用DataReader读取数据时，与DataReader对象关联的Connection对象不能再为其他对象所使用。因此，在使用完DataReader后，应显式调用DataReader的Close()方法断开和Connection的关联。
+
+ 
+
+2. 使用DataAdapter和DataSet对象读取数据
+
+DataAdapter是DataSet与数据库之间的沟通媒介，DataAdapter打开一个连接并执行指定的SQL命令，将获取的数据填充到DataSet。也可以将DataSet中的数据更新到数据源中。DataAdapter对象常用方法有：1. Fill()从数据源获取数据填充DataSet；2. Update()将DataSet中的数据更新到数据源。
+
+DataSet是数据在内存中的缓存，相当于在内存中的一个小型关系数据库，与数据源是断开的。DataSet的结构和关系型数据库很类似，具有表、行、列等属性。它主要用于在内存中存放数据，可以一次读取整张数据表的内容。
+
+DataSet对象可以存放DataAdapter对象执行SQL命令后所取得的数据。DataSet也是一个集合对象，一个DataSet对象包括一组DataTable对象和DataRelation对象，应用程序可以通过DataTable对象和DataTable对象内的DataColumn对象、DataRow对象的操作读取数据。
+
+SqlDataAdapter da=new SqlDataAdapter(cmdstr,con);//使用指定的SQL命令和连接对象创建SqlDataAdapter对象
+
+DataSet ds=new DataSet();//创建DataSet对象
+
+da.Fill(ds,"table_name");//使用SqlDataAdapter的Fill方法填充DataSet，并创建一个名为“table_name”的DataTable对象，将数据存放其中
+
+ 
+
+DataSet读取数据的过程如下：
+
+1. 创建连接
+
+2. 创建DataAdapter对象
+
+3. 创建DataSet对象
+
+4. 执行DataAdapter对象的Fill()方法
+
+5. 将DataSet中的表绑定到数据控件中
+
+DataReader读取数据的过程如下：
+
+1. 创建连接
+
+2. 打开连接
+
+3. 创建Command对象。
+
+4. 执行Command的ExecuteReader()方法
+
+5. 将DataReader绑定到数据控件中
+
+6. 关闭DataReader
+
+7. 关闭连接
+
+ 
+
+DataAdapter的Fill方法会自动检查数据库连接是否打开，如果没有打开，则先自动调用Open()方法打开连接，再执行填充操作，在数据填充结束后，会自动调用Close()方法关闭数据库连接。因此无须在代码中添加Open()和Close()方法。
+
+使用Command对象时，需要手工添加Open()方法以打开数据库的连接，最后还需要添加Close()方法关闭连接。
+
+ 
+
+三、更新数据
+
+数据更新是指对数据进行添加、删除和修改等操作。数据更新通常有两种方法：1、使用DataAdapter对象，2、使用Command对象。
+
+ 
+
+1. 使用DataAdapter对象更新数据
+
+通过DataAdapter对象将数据填充到DataSet后，便可对DataSet中的数据进行修改、添加和删除操作，然后再将DataSet中的数据更新回数据库。
+
+SqlDataAdapter da=new SqlDataAdapter(cmdstr,con);
+
+DataSet ds=new DataSet();
+
+da.Fill(ds,"table_name");
+
+SqlCommandBuilder cb=new SqlCommandBuilder(da);//绑定SqlDataAdapter对象，自动生成从DataSet更新SQL Server的SQL命令
+
+//更新DataSet对象的数据，例如：
+
+ds.Tables["table_name"].Rows[0]["column_name"]=abc;//修改数据
+
+//添加数据
+
+//删除数据
+
+da.Update(ds,"table_name");//将DataSet的数据更新回SQL Server数据库
+
+注意：DataSet中的数据必须至少存在一个主键列或唯一的列。如果不存在主键列或唯一列，调用Update()时将会产生InvalidOperation异常，不会生成自动更新数据库的Insert、Update或Delete命令。
+
+ 
+
+2. 使用Command对象更新数据
+
+ 
+
+四、使用Command对象实现数据库的事务处理
+
+事务是一组由相关任务组成的单元，该单元中的任务要么全部成功，要么全部失败。事务最终执行的结果只能是两种状态，即提交或终止。
+
+在事务执行的过程中，如果某一步失败，则需要将事务范围内所涉及的数据更改恢复到事务执行前设置的特定点，这个操作称为回滚。例如，用户如果要给一个表中插入10条记录，在执行过程中，插入到第5条时发生错误，这时便执行事务回滚操作，将已经插入的4条记录从数据表中删除。
+
+以下代码是ASP.NET应用程序实现事务处理的示例，代码向数据库添加记录，并使用try...catch语句捕捉异常，当出现异常时，执行事务回滚操作。
+Public Void Insert(Int ID)
+{
+
+con.Open();
+
+string cmdstr="insert into table_name(id) values("+ID+")";
+
+SqlTransaction st=con.BeginTransaction();//调用SqlConnection对象的BeginTransaction()方法创建一个SqlTransaction对象
+
+SqlCommand cmd=new SqlCommand(cmdstr,con);
+
+cmd.Transaction=st;
+
+try
+
+{
+
+      cmd.ExecuteNonQuery();
+
+      st.Commit();//提交事务
+
+      con.Close();
+
+}
+
+catch
+
+{
+
+      Response.Write("<script>alert('插入失败，执行事务回滚')</script>");
+
+      st.Rollback();//执行事务回滚操作
+
+}
+}

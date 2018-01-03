@@ -1,0 +1,53 @@
+
+---上个月月初第一天
+select CONVERT(varchar(12) , DATEADD(mm,DATEDIFF(mm,0,dateadd(mm,-1,getdate())),0), 112 )
+---上个月月末最后一天
+select CONVERT(varchar(12),dateadd(ms,-3,DATEADD(mm,DATEDIFF(m,0,getdate()),0)), 112 )
+--1. 显示本月第一天
+SELECT DATEADD(mm,DATEDIFF(mm,0,getdate()),0)
+select convert(datetime,convert(varchar(8),getdate(),120)+'01',120)
+--2. 显示本月最后一天
+select dateadd(day,-1,convert(datetime,convert(varchar(8),dateadd(month,1,getdate()),120)+'01',120))
+SELECT dateadd(ms,-3,DATEADD(mm,DATEDIFF(m,0,getdate())+1,0))
+--3. 上个月的最后一天
+SELECT dateadd(ms,-3,DATEADD(mm,DATEDIFF(mm,0,getdate()),0))
+--4. 本月的第一个星期一
+select DATEADD(wk,DATEDIFF(wk,0, dateadd(dd,6-datepart(day,getdate()),getdate())),0)
+--5. 本年的第一天
+SELECT DATEADD(yy,DATEDIFF(yy,0,getdate()),0)
+--6. 本年的最后一天
+SELECT dateadd(ms,-3,DATEADD(yy,DATEDIFF(yy,0,getdate())+1,0))
+--7. 去年的最后一天
+SELECT dateadd(ms,-3,DATEADD(yy,DATEDIFF(yy,0,getdate()),0))
+--8. 本季度的第一天
+SELECT DATEADD(qq,DATEDIFF(qq,0,getdate()),0)
+--9. 本周的星期一
+SELECT DATEADD(wk,DATEDIFF(wk,0,getdate()),0)
+--10. 查询本月的记录
+select * from tableName where DATEPART(mm, theDate)=DATEPART(mm, GETDATE()) and DATEPART(yy, theDate) = DATEPART(yy, GETDATE())
+--11. 查询本周的记录
+select * from tableName where DATEPART(wk, theDate) = DATEPART(wk, GETDATE()) and DATEPART(yy, theDate) = DATEPART(yy, GETDATE())
+--12 查询本季的记录 注：其中:GETDATE() 是获得系统时间的函数。
+select * from tableName where DATEPART(qq, theDate) = DATEPART(qq, GETDATE()) and DATEPART(yy, theDate) = DATEPART(yy, GETDATE())
+--13. 获取当月总天数:
+select DATEDIFF(dd,getdate(),DATEADD(mm, 1, getdate()))
+select datediff(day,dateadd(mm, datediff(mm,'',getdate()), ''),dateadd(mm, datediff(mm,'',getdate()), '1900-02-01'))
+--14. 获取当前为星期几
+SELECT DATENAME(weekday, getdate())
+select CONVERT(varchar(12) , getdate(), 101 ) --12/28/2007
+select CONVERT(varchar(12) , getdate(), 102 ) --2007.12.28
+select CONVERT(varchar(12) , getdate(), 103 ) --28/12/2007
+select CONVERT(varchar(12) , getdate(), 104 ) --28.12.2007
+select CONVERT(varchar(12) , getdate(), 105 ) --28-12-2007
+select CONVERT(varchar(12) , getdate(), 106 ) --28 12 2007
+select CONVERT(varchar(12) , getdate(), 107 ) --12 28, 2007
+select CONVERT(varchar(12) , getdate(), 108 ) --10:06:33
+select CONVERT(varchar(12) , getdate(), 109 ) --12 28 2007 1
+select CONVERT(varchar(12) , getdate(), 110 ) --12-28-2007
+select CONVERT(varchar(12) , getdate(), 111 ) --2007/12/28
+select CONVERT(varchar(12) , getdate(), 112 ) --20071228
+select CONVERT(varchar(12) , getdate(), 113 ) --28 12 2007 1
+select CONVERT(varchar(12) , getdate(), 114 ) --10:07:36:623
+select CONVERT(varchar, getdate(), 120 ) --2007-12-28 10:08:56
+select CONVERT(varchar(10), getdate(), 120 ) --2007-12-28
+select replace(replace(replace(CONVERT(varchar, getdate(), 120 ),'-',''),' ',''),':','') --20071228101012 

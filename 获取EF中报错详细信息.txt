@@ -1,0 +1,17 @@
+﻿Exception类，让我们能够轻松的知道具体的哪一个字段出了什么问题。
+
+那就是 System.Data.Entity.Validation.DbEntityValidationException，相信代码都知道怎么写了，最简单的就是
+try
+{
+    // 写数据库
+}
+catch (DbEntityValidationException dbEx)
+{
+
+}
+
+
+
+在 dbEx 里面中我们就可以看到
+
+这样子我们就能看到 EntityValidationErrors 所有的 ValidationErrors 的详细信息了。

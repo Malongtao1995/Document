@@ -1,0 +1,6 @@
+交叉查询：笛卡尔积，A表*B表   Select A.c1,B.c1 FROM A CROSS JOIN B
+内连接：在交叉连接的基础上，根据ON过滤条件。 SELECT A.c1,B.c1 FROM A INNER JOIN B ON A.c2=B.c3
+左外连接：以左表为保留表，在内连接的基础上，将右表ON连接条件找不到的行以占位符NULL添加到内连接的结果集中，即添加外部行 SELECT A.c1,B.c1 FROM A LEFT OUTER JOIN B ON A.c2=B.c3
+右外连接：同左外连接，以右表为保留表
+全连接：左右均为保留表 SELECT A.c1,B.c1 FROM A FULL OUTER JOIN B ON A.c2=B.c3
+自连接：单表取两个别名来连接

@@ -1,0 +1,78 @@
+﻿  columns: [
+          {dataField: 'WC_ID', caption: 'Рабочий центр', dataType: 'number', visible: true, width: 200, lookup: {dataSource: self.wcTree(), valueExpr: "wc_id", displayExpr: "txt"}, 
+            editCellTemplate: function(cellElement, cellInfo){
+              var divCell = document.createElement("div");
+              cellElement.get(0).appendChild(divCell);
+              $(divCell).dxDropDownBox({
+                  value: cellInfo.value,
+                  dataSource: self.wcTree(),
+                  valueExpr: 'wc_id',
+                  displayExpr: 'txt',
+                  width: 350,
+                  placeholder: "Выберите значение...",
+                  onValueChanged: function(cell) {
+                      cellInfo.setValue(cell.value);
+                  },
+                  contentTemplate: function(e, element){
+                     var div = document.createElement("div");
+                     var $div = $(div);
+                     var divText = document.createElement("div");
+                     var divTree = document.createElement('div');
+                     $div.get(0).appendChild(divText);
+                     $div.get(0).appendChild(divTree);
+                     $(divText).dxTextBox({
+                        placeholder: "Поиск",
+                        width: 300,
+                        mode: "search",
+                        valueChangeEvent: "keyup",
+                        onValueChanged: function(e) {
+                          self.noSearch = false;
+                          try {
+                            if (treeView) treeView.option("searchValue", e.value);
+                          } catch(error) {
+                            mess.message(error.name);
+                          } finally {
+                            self.noSearch = true;
+                          }
+                        }
+                    });
+                     var treeView = $(divTree).dxTreeView({
+                        dataSource: e.component.option("dataSource"),
+                        //value: e.component.option("value"),
+                        rootValue: 100,
+                        dataStructure: "plain",
+                        keyExpr: "wc_id",
+                        parentIdExpr: "prv_wc",
+                        selectionMode: "single",
+                        displayExpr: "txt",
+                        selectByClick: true,
+                        height: 400,
+                        searchValue: "",
+                        selectNodesRecursive: false,
+                        onContentReady: function(data){
+                          var value = e.component.option("value");
+                          if (value > 0 && self.noSearch) {
+                            try {
+                              self.tvFlagReady = true;
+                              data.component.expandItem(value);
+                              data.component.selectItem(value);
+                            } catch(err) {
+                              mess.message(err.name);
+                            } finally {
+                              self.tvFlagReady = false;
+                            }                           
+                          }
+                        },
+                        onItemSelectionChanged: function(data){
+                          if (!self.tvFlagReady) {
+                            var value = data.component.getSelectedNodesKeys()[0];
+                            e.component.option("value", value);
+                            e.component.close();
+                          }
+                        }
+                    }).dxTreeView("instance");
+                    return $div;
+                  } 
+              });
+            }
+          },

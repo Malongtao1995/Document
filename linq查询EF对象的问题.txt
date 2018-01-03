@@ -1,0 +1,18 @@
+使用linq查询时候
+如果查询的结果是ef框架对象,
+linq后面的语句最后没有类似FirstOrDefault()方法的话
+查询得到的对象转化成 ef框架的对象,是不成功的.
+例如
+SchoolContext db = new SchoolContext();
+            //查询
+            var Courses = db.Courses.Where(c => c.Title == "Physics").OrderBy(c => c.Title);
+            Course a = new Course();
+            a=(Course)Courses;//(这里转换对象的时候是转换不了的)
+修改方法:
+把linq语句后面加上FirstOrDefault()方法
+var Courses = db.Courses.Where(c => c.Title == "Physics").OrderBy(c => c.Title).FirstOrDefault();
+
+简单来说如果linq语句后面没有类似FirstOrDefault()的方法,查询出来的结果不是ef对象,是一个查询字符串
+而如果加上了FirstOrDefault()方法,获取到的就是ef对象
+如果获取到的是查询字符串(没有用FirstOrDefault()方法),操作ef对象就需要用for遍历该字符串,
+如果获取到的是ef对象(使用FirstOrDefault()方法),是可以直接操作ef对象的.

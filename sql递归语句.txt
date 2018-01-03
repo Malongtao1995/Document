@@ -1,0 +1,7 @@
+//sql server根据一级分类查询所有子级分类
+WITH a AS
+ (
+    SELECT * FROM dbo.db_UserGroup WHERE TB_UserGroupID=1
+    UNION ALL SELECT s.* FROM dbo.db_UserGroup AS s,a WHERE s.FK_ParentId=a.TB_UserGroupID
+)
+SELECT * FROM a
